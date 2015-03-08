@@ -1,0 +1,421 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+        <link href="/static/bootflat/css/bootflat.min.css" rel="stylesheet">
+		<link href="/static/selecter/jquery.fs.selecter.min.css" rel="stylesheet">
+		<style type="text/css">
+		.navbar{
+			border-radius: 0px;
+		}
+		.inner-box {
+			width: 1140px;
+			margin: 0px auto;
+		}
+		.navbar-custom {
+			background-color: #001172;
+			border-color: #001172;
+		}
+
+		@media print{
+			.alert-danger {
+				background-color: #f2838f !important;
+				border: #ed5565;
+				-webkit-print-color-adjust: exact;
+			}
+			.alert-success {
+				background-color: #b9df90 !important;
+				border: #a0d468;
+				-webkit-print-color-adjust: exact;
+			}
+			.alert-warning {
+				background-color: #ffdd87 !important;
+				border: #ffce54;
+				-webkit-print-color-adjust: exact;
+			}
+			.alert-info {
+				background-color: #7cd1ef !important;
+				border: #4fc1e9;
+				-webkit-print-color-adjust: exact;
+			}
+		}
+		</style>
+        <title>ジョハリの窓</title>
+    </head>
+    <body>
+    <div class="docs-header">
+    	<div class="inner-box">
+    		<span><img src="http://potect-a.com/wp-content/uploads/2013/11/logo.gif" alt="自己分析診断テスト「ポテクト」"></span>
+    	</div>
+    	<nav class="navbar navbar-default navbar-custom" role="navigation">
+    		<div class="container">
+    		</div>
+    	</nav>
+    </div>
+	<div class="container">
+		<div class="jumbotron">
+			<div class="jumbotron-contents">
+				<h1>ジョハリの窓 Web実行ツール</h1>
+				<hr/>
+				<div class="row">
+					<div class="col-md-12" name="conWelcome">
+						<h4>ジョハリの窓とは？</h4>
+						<p>自分が知っている自分、他人が知っている自分を4つの窓(カテゴリ)に分類して理解する、心理学のモデルです。<br/>主観的な自分と客観的な自分がわかるので効果的な自己分析ができます。</p>
+						<p>より詳しい説明はこちら: <a href="http://potect-a.com/utilization/johari_window/">ポテクト「ジョハリの窓で自己分析・社員研修」</a></p>
+						<br/>
+						<h4>このツールの使い方</h4>
+						<ol>
+							<li>知人同士を4人〜8人集めてグループを作ります。</li>
+							<li>グループの人数を選び、メンバーの名前を記入します。</li>
+							<li>「スタート」を押すと、個人の特性や能力を表す言葉とメンバーの名前が一覧で表示されます。</li>
+							<li>名前を記入した人から順番に、特性や能力に当てはまると思う人のところにすべてチェックを打ちます。<br/>
+								順番を間違えると正しく診断ができませんので注意してください。</li>
+							<li>チェックをし終わったら「次の人へ」ボタンを押してください。</li>
+							<li>4〜5の処理をメンバー全員が終わるまで繰り返します。</li>
+							<li>最後に全員分のジョハリの窓が表示されます。</li>
+						</ol>
+						<br/>
+						<p><strong>何人で行いますか？</strong></p>
+						<select id="numOfMembers" oldval="0">
+							<option value="4" selected>4</option>
+							<option value="5">5</option>
+							<option value="6">6</option>
+							<option value="7">7</option>
+							<option value="8">8</option>
+						</select>
+						<br/>
+						<p><strong>メンバーの名前を入力してください。</strong> (結果表示にのみ使用されます)</p>
+						<div id="memberFields">
+						</div>
+						<hr/>
+						<p>※ 途中でブラウザの「戻る」や「更新」を押すと処理がリセットされるのでご注意ください。</p>
+						<div class="row">
+							<div class="col-md-6">
+								<button type="button" name="btnStart" class="btn btn-primary" disabled>スタート</button>
+							</div>
+						</div>
+
+					</div> <!-- conWelcome -->
+					<div name="conCheck" class="jumbotron-contents" style="display:none">
+						<h5><span name="player"></span>さんの番です</h5>
+						<p>それぞれの資質に当てはまると思うものすべてをチェックしてください。</p>
+						<table class="table table-striped" id="mainTable">
+						</table>
+						<button type="button" name="btnToNext" class="btn btn-primary">次の人へ</button>
+					</div>
+					<div name="conResult" class="jumbotron-contents" style="display:none">
+						<h2>結果発表</h2>
+						<div style='page-break-after:always'></div><!-- page break for printout -->
+						<div id="result">
+						<!-- final result is shown here -->
+						</div>
+						<button type="button" name="btnRestart" class="btn btn-primary">もう一度</button>
+						<button type="button" name="btnToTop" class="btn btn-primary">トップに戻る</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="site-footer">
+		<div class="container">
+			<p>© 2015 Kazunori Hashikuchi All rights reserved.</p>
+		</div>
+	</div>
+	<script src="https://code.jquery.com/jquery.js"></script>
+	<script src="/static/bootstrap/js/bootstrap.min.js"></script>
+	<script src="/static/bootflat/js/icheck.min.js"></script>
+	<script src="/static/bootflat/js/jquery.fs.selecter.min.js"></script>
+	<script src="/static/bootflat/js/jquery.fs.stepper.min.js"></script>
+	<script src="/static/selecter/jquery.fs.selecter.min.js"></script>
+	<script>
+		var players, currentPlayer, myFeatures, yourFeatures;
+		var features = [
+			"頭が良い", "発想力がある", "段取り力がある", "向上心がある", "行動力がある",
+			"表情が豊か", "話し上手", "聞き上手", "親切", "リーダーシップ",
+			"空気が読める", "情報通", "根性がある", "責任感がある", "プライドが高い",
+			"自信家", "頑固", "真面目", "慎重"
+		];
+
+ 		function initialize(){
+ 			// initialize variables
+ 			players = [];
+ 			currentPlayer = -1;
+ 			myFeatures = [];
+ 			yourFeatures = [];
+
+ 			// make selecter cool :)
+			$("select").selecter();
+
+			// reset elements
+			$("#mainTable").empty();
+			$("#result").empty();
+			createMemberFields();
+			changeStartBtnStatus();
+
+			// add eventlisteners
+			$("[name='member']").unbind().keyup(function(){
+				changeStartBtnStatus();
+			});
+			$("[name='btnStart']").unbind().click(startJohari);
+			$("[name='btnToNext']").text("次の人へ").unbind().click(updateJohari);
+			$("[name='btnRestart']").unbind().click(initialize);
+			$("[name='btnToTop']").unbind().click(function(){location.href="http://potect-a.com/";});			
+			$("#numOfMembers").unbind().change(createMemberFields);
+
+			// reset screens
+			$("[name='conWelcome']").css("display", "");
+			$("[name='conCheck']").css("display", "none");
+			$("[name='conResult']").css("display", "none");
+		}
+
+		function changeStartBtnStatus(){
+			var btnStart = $("[name='btnStart']");
+			if(checkMemberValues()){
+				btnStart.removeAttr("disabled");
+			}else{
+				btnStart.attr("disabled", true);
+			}		
+		}
+
+		function createMemberFields(){
+			var numOfMembers = $("#numOfMembers").val();
+			var oldval = $("#numOfMembers").attr("oldval") * 1;
+			if(oldval < numOfMembers){
+				for(var i=oldval+1;i<=numOfMembers;i++){
+					$("#memberFields").append(
+						"<div class='row'><div class='col-md-6'><input class='form-control' name='member' placeholder='" + i +"人目の名前を入力'/></div></div>"
+					);
+				}
+			}else{
+				for(var i=1;i<=(oldval-numOfMembers);i++){
+					$("#memberFields>:last").remove();
+				}
+			}
+			// reset eventhandler of member fields
+			$("[name='member']").unbind().change(function(){
+				if(checkMemberValues()) $("[name='btnStart']").removeAttr("disabled");
+			});
+			$("#numOfMembers").attr("oldval", numOfMembers);
+		}
+
+		function checkMemberValues(){
+			var len = $("[name='member']").length;
+			for(var i=0; i<len; i++){
+				if($("[name='member']")[i].value.length > 0){
+					continue;
+				}else{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		function startJohari(){
+			$("[name='member']").each(function(){
+				players.push($(this).val());
+				myFeatures.push([]);
+				yourFeatures.push([]);
+			});
+			$("[name='conWelcome']").css("display", "none");			
+			$("[name='conCheck']").css("display", "");
+			createTable();
+			updateJohari();
+		}
+
+		function createTable(){
+			var table = $("#mainTable");
+			var header = "";
+			var content = "";
+			var footer = "";
+
+			// append header
+			header = "<thead id='mainTableHeader'><tr><th></th>";
+			for(var i=0; i<players.length; i++){
+				header += "<th>" + players[i] + "</th>";
+			}
+			header += "</thead>";
+			table.append(header);
+
+			// append content
+			content = "<tbody>";
+			for(var i=0; i<features.length; i++){
+				content += "<tr><td>" + features[i] + "</td>";
+				for(var j=0; j<players.length; j++){
+					content += "<td><input type='checkbox' name='features' value='" + i + "," + j + "'></td>";
+				}
+				content += "</tr>";
+			}
+			content += "</tbody>";
+
+			table.append(content);
+
+			// append footer
+			footer = "<tfoot id='mainTableHeader'><tr><th></th>";
+			for(var i=0; i<players.length; i++){
+				footer += "<th>" + players[i] + "</th>";
+			}
+			header += "</foot>";
+			table.append(footer);
+		}
+
+		function updateJohari(){
+			$("[name='btnToNext']").attr("disabled"); // prevent double click
+			$("html body").animate({scrollTop:0}, "slow");
+			$("input:checked").each(function(){
+				var feature = $(this).val().split(",")[0];
+				var player = $(this).val().split(",")[1];
+				updateFeatures(feature, player);
+			});
+			$("input:checked").attr("checked", false); // uncheck checkboxes
+
+			currentPlayer++;
+			if(currentPlayer < players.length){
+				$("[name='player']").text(players[currentPlayer]);
+				if(currentPlayer == players.length - 1){
+					$("[name='btnToNext']").text("結果を見る").click(showResult);	
+				}
+			}
+			$("[name='btnToNext']").removeAttr("disabled"); // enable button
+		}
+
+		function updateFeatures(f, p){
+			if(currentPlayer == p){
+				myFeatures[p].push(f);
+			}else{
+				yourFeatures[p].push(f);
+				yourFeatures[p].sort();
+			}
+		}
+
+		function showResult(){
+			$("[name='conCheck']").css("display", "none");
+			$("[name='conResult']").css("display", "");
+			for(var i=0; i<players.length; i++){
+				showJohariWindow(i);
+			}
+		}
+
+		function getOpenWindow(player){
+			var result = [];
+			var mine = myFeatures[player];
+			var fromOthers = yourFeatures[player]; 
+			for(var i=0; i<mine.length; i++){
+				if(fromOthers.indexOf(mine[i]) > -1){
+					result.push(mine[i]);
+				}
+			}
+			return result;
+		}
+
+		function getHiddenWindow(player){
+			var result = [];
+			var mine = myFeatures[player];
+			var fromOthers = yourFeatures[player]; 
+			for(var i=0; i<mine.length; i++){
+				if(fromOthers.indexOf(mine[i]) == -1){
+					result.push(mine[i]);
+				}
+			}
+			return result;
+		}
+
+		function getBlindWindow(player){
+			var result = [];
+			var mine = myFeatures[player];
+			var fromOthers = yourFeatures[player];
+			for(var i=0; i<fromOthers.length; i++){
+				if(mine.indexOf(fromOthers[i]) == -1){
+					result.push(fromOthers[i]);
+				}
+			}
+			return result;			
+		}
+
+		function getUnknownWindow(player){
+			var result = [];
+			var known = myFeatures[player].concat(yourFeatures[player]);
+			for(var i=0; i<features.length; i++){
+				if(known.indexOf(i.toString()) == -1){
+					result.push(i);
+				}
+			}
+			return result;
+		}
+
+		function convertWinToElements(win){
+			var elm = "<div class='row'>";
+			var numelm = 0;
+			var temp = "";
+			var lastone = "";
+			var times = 0;
+			var convertedFeatures = [];
+			var numExtraBlank = 0;
+
+			for(var i=0; i<features.length; i++){
+				if(lastone === features[win[i]] || i == 0){
+					times++;
+					numExtraBlank++;
+				}else{
+					temp = times>1?lastone+" ×"+times:lastone;
+					convertedFeatures.push(temp);
+					// reset
+					temp = "";
+					times = 1;
+				}
+				lastone = features[win[i]]?features[win[i]]:"&nbsp;";
+			}
+			// process of the last
+			temp = times>1?lastone+"×"+times:lastone;
+			convertedFeatures.push(temp);
+
+			for(var i=0; i<=numExtraBlank; i++){
+				convertedFeatures.push("&nbsp;");
+			}
+
+			for(var i=0; i<convertedFeatures.length; i++){
+				elm += "<div class='col-md-4 col-xs-6'>"+convertedFeatures[i]+"</div>";
+				numelm++;
+				if(numelm == 3){
+					elm += "</div><div class='row'>";
+					numelm = 0;
+				}
+			}
+			elm += "</div>";
+			return elm;
+		}
+
+		function showJohariWindow(player){
+			var result = $("#result");
+			var openWindow;
+			var openWindowElm = "";
+			var hiddenWindow;
+			var hiddenWindowElm = "";
+			var blindWindow;
+			var blindWindowElm = "";
+			var unknownWindow;
+			var unknownWindowElm = "";
+
+			result.append("<h3>" + players[player] +"さんのジョハリの窓</h3>");
+			result.append("<div class='row'><div class='col-md-6 col-xs-6'><div class='alert alert-danger' id='open_" + player + "'><h4>開放の窓</h4></div></div><div class='col-md-6 col-xs-6'><div class='alert alert-success' id='blind_" + player + "'><h4>盲点の窓</h4></div></div></div><div class='row'><div class='col-md-6 col-xs-6'><div class='alert alert-warning' id='hidden_" + player + "'><h4>秘密の窓</h4></div></div><div class='col-md-6 col-xs-6'><div class='alert alert-info' id='unknown_"+ player +"'><h4>未知の窓</h4></div></div></div>");
+			// open window
+			$("#open_" + player).append(convertWinToElements(getOpenWindow(player)));
+
+			// hidden window
+			$("#hidden_" + player).append(convertWinToElements(getHiddenWindow(player)));
+
+			// blind window
+			$("#blind_" + player).append(convertWinToElements(getBlindWindow(player)));
+
+			// unknown window
+			$("#unknown_" + player).append(convertWinToElements(getUnknownWindow(player)));
+			result.append("<hr/>");
+			result.append("<div style='page-break-before:always'>"); //page break for printout
+		}
+
+		$(document).ready(function(){
+			initialize();
+		});
+	</script>
+    </body>
+</html>
