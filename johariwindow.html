@@ -110,8 +110,8 @@
 						<div id="result">
 						<!-- final result is shown here -->
 						</div>
-						<button type="button" name="btnRestart" class="btn btn-primary">もう一度</button>
-						<button type="button" name="btnToTop" class="btn btn-primary">トップに戻る</button>
+						<button type="button" name="btnRestart" class="btn btn-default">もう一度</button>
+						<button type="button" name="btnToTop" class="btn btn-primary">アプリを終了する</button>
 					</div>
 				</div>
 			</div>
@@ -158,7 +158,7 @@
 			$("[name='btnStart']").unbind().click(startJohari);
 			$("[name='btnToNext']").text("次の人へ").unbind().click(updateJohari);
 			$("[name='btnRestart']").unbind().click(initialize);
-			$("[name='btnToTop']").unbind().click(function(){location.href="http://potect-a.com/";});			
+			$("[name='btnToTop']").unbind().click(function(){location.href="http://potect-a.com/thank-you-for-the-johariwindow/";});			
 			$("#numOfMembers").unbind().change(createMemberFields);
 
 			// reset screens
