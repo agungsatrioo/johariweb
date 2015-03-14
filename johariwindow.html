@@ -4,7 +4,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
         <link href="/static/bootflat/css/bootflat.min.css" rel="stylesheet">
-		<link href="/static/selecter/jquery.fs.selecter.min.css" rel="stylesheet">
+        <link href="/static/bootstrap-select/bootstrap-select.min.css" rel="stylesheet">
 		<style type="text/css">
 		.navbar{
 			border-radius: 0px;
@@ -77,13 +77,14 @@
 						</ol>
 						<br/>
 						<p><strong>何人で行いますか？</strong></p>
-						<select id="numOfMembers" oldval="0">
+						<select class="selectpicker" id="numOfMembers" oldval="0">
 							<option value="4" selected>4</option>
 							<option value="5">5</option>
 							<option value="6">6</option>
 							<option value="7">7</option>
 							<option value="8">8</option>
 						</select>
+						<br/>
 						<br/>
 						<p><strong>メンバーの名前を入力してください。</strong> (結果表示にのみ使用されます)</p>
 						<div id="memberFields">
@@ -95,7 +96,6 @@
 								<button type="button" name="btnStart" class="btn btn-primary" disabled>スタート</button>
 							</div>
 						</div>
-
 					</div> <!-- conWelcome -->
 					<div name="conCheck" class="jumbotron-contents" style="display:none">
 						<h5><span name="player"></span>さんの番です</h5>
@@ -128,6 +128,7 @@
 	<script src="/static/bootflat/js/jquery.fs.selecter.min.js"></script>
 	<script src="/static/bootflat/js/jquery.fs.stepper.min.js"></script>
 	<script src="/static/selecter/jquery.fs.selecter.min.js"></script>
+	<script src="/static/bootstrap-select/bootstrap-select.min.js"></script>
 	<script>
 		var players, currentPlayer, myFeatures, yourFeatures;
 		var features = [
@@ -143,9 +144,6 @@
  			currentPlayer = -1;
  			myFeatures = [];
  			yourFeatures = [];
-
- 			// make selecter cool :)
-			$("select").selecter();
 
 			// reset elements
 			$("#mainTable").empty();
