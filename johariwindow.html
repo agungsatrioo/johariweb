@@ -5,6 +5,7 @@
         <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
         <link href="/static/bootflat/css/bootflat.min.css" rel="stylesheet">
         <link href="/static/bootstrap-select/bootstrap-select.min.css" rel="stylesheet">
+        <link href="/static/sweetalert-master/lib/sweet-alert.css" rel="stylesheet">
 		<style type="text/css">
 		.navbar{
 			border-radius: 0px;
@@ -68,8 +69,8 @@
 						<ol>
 							<li>知人同士を4人〜8人集めてグループを作ります。</li>
 							<li>グループの人数を選び、メンバーの名前を記入します。</li>
-							<li>「スタート」を押すと、個人の特性や能力を表す言葉とメンバーの名前が一覧で表示されます。</li>
-							<li>名前を記入した人から順番に、特性や能力に当てはまると思う人のところにすべてチェックを打ちます。<br/>
+							<li>「スタート」を押すと、個人の特徴を表す言葉とメンバーの名前が一覧で表示されます。</li>
+							<li>名前を記入した人から順番に、メンバーに当てはまると思う特徴をチェックします。<br/>
 								順番を間違えると正しく診断ができませんので注意してください。</li>
 							<li>チェックをし終わったら「次の人へ」ボタンを押してください。</li>
 							<li>4〜5の処理をメンバー全員が終わるまで繰り返します。</li>
@@ -99,7 +100,8 @@
 					</div> <!-- conWelcome -->
 					<div name="conCheck" class="jumbotron-contents" style="display:none">
 						<h5><span name="player"></span>さんの番です</h5>
-						<p>それぞれの資質に当てはまると思うものすべてをチェックしてください。</p>
+						<p>メンバーに当てはまると思う特徴をチェックしてください。</p>
+						<p>ひとりにつきチェックできるのは<span id="maxCheckableNum"></span>個までです。</p>
 						<table class="table table-striped" id="mainTable">
 						</table>
 						<button type="button" name="btnToNext" class="btn btn-primary">次の人へ</button>
@@ -129,6 +131,7 @@
 	<script src="/static/bootflat/js/jquery.fs.stepper.min.js"></script>
 	<script src="/static/selecter/jquery.fs.selecter.min.js"></script>
 	<script src="/static/bootstrap-select/bootstrap-select.min.js"></script>
+	<script src="/static/sweetalert-master/lib/sweet-alert.min.js"></script>
 	<script>
 		var players, currentPlayer, myFeatures, yourFeatures;
 		var features = [
@@ -160,7 +163,6 @@
 			$("[name='btnRestart']").unbind().click(initialize);
 			$("[name='btnToTop']").unbind().click(function(){location.href="http://potect-a.com/thank-you-for-the-johariwindow/";});			
 			$("#numOfMembers").unbind().change(createMemberFields);
-
 			// reset screens
 			$("[name='conWelcome']").css("display", "");
 			$("[name='conCheck']").css("display", "none");
@@ -219,6 +221,7 @@
 			$("[name='conCheck']").css("display", "");
 			createTable();
 			updateJohari();
+			$("#maxCheckableNum").text(getMaxCheckableNumber());
 		}
 
 		function createTable(){
@@ -240,7 +243,7 @@
 			for(var i=0; i<features.length; i++){
 				content += "<tr><td>" + features[i] + "</td>";
 				for(var j=0; j<players.length; j++){
-					content += "<td><input type='checkbox' name='features' value='" + i + "," + j + "'></td>";
+					content += "<td><input type='checkbox' name='features_" + j + "' value='" + i + "," + j + "'></td>";
 				}
 				content += "</tr>";
 			}
@@ -255,11 +258,23 @@
 			}
 			header += "</foot>";
 			table.append(footer);
+
+			// reset and add event listner
+			$("input[type='checkbox'][name^='features_']").unbind().click(function(){
+				if(!isCheckableNum(this.name.replace(/features_/, ""))){
+					this.checked = false;
+					swal({
+						type: "error",
+						title: "チェックが上限を超えました。",
+						text: "ひとりにつきチェックできる特徴は" + getMaxCheckableNumber() + "個までです。"
+					});
+				}
+			});
 		}
 
 		function updateJohari(){
 			$("[name='btnToNext']").attr("disabled"); // prevent double click
-			$("html body").animate({scrollTop:0}, "slow");
+			$("html body").animate({scrollTop:0}, "slow"); // scroll to top
 			$("input:checked").each(function(){
 				var feature = $(this).val().split(",")[0];
 				var player = $(this).val().split(",")[1];
@@ -268,6 +283,7 @@
 			$("input:checked").attr("checked", false); // uncheck checkboxes
 
 			currentPlayer++;
+
 			if(currentPlayer < players.length){
 				$("[name='player']").text(players[currentPlayer]);
 				if(currentPlayer == players.length - 1){
@@ -409,6 +425,16 @@
 			$("#unknown_" + player).append(convertWinToElements(getUnknownWindow(player)));
 			result.append("<hr/>");
 			result.append("<div style='page-break-before:always'>"); //page break for printout
+		}
+
+		function getMaxCheckableNumber(){
+			var numOfFeatures = features.length;
+			var numOfPlayers = players.length;
+			return Math.ceil((numOfFeatures / 1.5)) - (numOfPlayers - 1);
+		}
+
+		function isCheckableNum(player){
+			return $("[name='features_" + player + "']:checked").length <= getMaxCheckableNumber();
 		}
 
 		$(document).ready(function(){
