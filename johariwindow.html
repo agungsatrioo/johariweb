@@ -7,41 +7,7 @@
         <link href="/static/bootflat/css/bootflat.min.css" rel="stylesheet" />
         <link href="/static/bootstrap-select/bootstrap-select.min.css" rel="stylesheet" />
         <link href="/static/sweetalert-master/lib/sweet-alert.css" rel="stylesheet" />
-		<style type="text/css">
-		.navbar{
-			border-radius: 0px;
-		}
-		.inner-box {
-			width: 1140px;
-			margin: 0px auto;
-		}
-		.navbar-custom {
-			background-color: #001172;
-			border-color: #001172;
-		}
-
-		@media print{
-			.alert-danger {
-				background-color: #f2838f !important;
-				border: #ed5565;
-				-webkit-print-color-adjust: exact;
-			}
-			.alert-success {
-				background-color: #b9df90 !important;
-				border: #a0d468;
-				-webkit-print-color-adjust: exact;
-			}
-			.alert-warning {
-				background-color: #ffdd87 !important;
-				border: #ffce54;
-				-webkit-print-color-adjust: exact;
-			}
-			.alert-info {
-				background-color: #7cd1ef !important;
-				border: #4fc1e9;
-				-webkit-print-color-adjust: exact;
-			}
-		}
+        <link href="lib/site.css" rel="stylesheet" />
 		</style>
         <title>ジョハリの窓</title>
     </head>
@@ -108,13 +74,22 @@
 						<button type="button" name="btnToNext" class="btn btn-primary">次の人へ</button>
 					</div>
 					<div name="conResult" class="jumbotron-contents" style="display:none">
-						<h2>結果発表</h2>
+						<h2>診断結果</h2>
 						<div style='page-break-after:always'></div><!-- page break for printout -->
 						<div id="result">
 						<!-- final result is shown here -->
 						</div>
+						<div class="row">
+							<div class="col-md-4">
+								<button type="button" name="btnFbShare" class="btn btn-fb btn-block">結果をFacebookでシェア</button>
+							</div>
+							<div class="col-md-4">
+								<button type="button" name="btnTwShare" class="btn btn-tw btn-block">結果をTwitterでシェア</button>
+							</div>
+						</div>
+						<br/>
 						<button type="button" name="btnRestart" class="btn btn-default">もう一度</button>
-						<button type="button" name="btnToTop" class="btn btn-primary">アプリを終了する</button>
+						<button type="button" name="btnToTop" class="btn btn-normal">アプリを終了する</button>
 					</div>
 				</div>
 			</div>
@@ -133,6 +108,25 @@
 	<script type="text/javascript" src="/static/selecter/jquery.fs.selecter.min.js"></script>
 	<script type="text/javascript" src="/static/bootstrap-select/bootstrap-select.min.js"></script>
 	<script type="text/javascript" src="/static/sweetalert-master/lib/sweet-alert.min.js"></script>
+	<script type="text/javascript" src="lib/site.js"></script>
+	<script>
+	  window.fbAsyncInit = function() {
+	    FB.init({
+	      appId      : '802789449809942', // テスト
+	      // appId      : '802767816478772', //本番
+	      xfbml      : true,
+	      version    : 'v2.3'
+	    });
+	  };
+
+	  (function(d, s, id){
+	     var js, fjs = d.getElementsByTagName(s)[0];
+	     if (d.getElementById(id)) {return;}
+	     js = d.createElement(s); js.id = id;
+	     js.src = "//connect.facebook.net/en_US/sdk.js";
+	     fjs.parentNode.insertBefore(js, fjs);
+	   }(document, 'script', 'facebook-jssdk'));
+	</script>
 	<script>
 		var players, currentPlayer, myFeatures, yourFeatures;
 		var features = [
@@ -222,7 +216,7 @@
 			$("[name='conCheck']").css("display", "");
 			createTable();
 			updateJohari();
-			$("#maxCheckableNum").text(getMaxCheckableNumber());
+			$("#maxCheckableNum").text(getMaxCheckableNumber(players, features));
 		}
 
 		function createTable(){
@@ -262,12 +256,12 @@
 
 			// reset and add event listner
 			$("input[type='checkbox'][name^='features_']").unbind().click(function(){
-				if(!isCheckableNum(this.name.replace(/features_/, ""))){
+				if(!isCheckableNum(this.name.replace(/features_/, ""), players, features)){
 					this.checked = false;
 					swal({
 						type: "error",
 						title: "チェックが上限を超えました。",
-						text: "ひとりにつきチェックできる特徴は" + getMaxCheckableNumber() + "個までです。"
+						text: "ひとりにつきチェックできる特徴は" + getMaxCheckableNumber(players, features) + "個までです。"
 					});
 				}
 			});
@@ -306,136 +300,31 @@
 		function showResult(){
 			$("[name='conCheck']").css("display", "none");
 			$("[name='conResult']").css("display", "");
-			for(var i=0; i<players.length; i++){
-				showJohariWindow(i);
-			}
-		}
-
-		function getOpenWindow(player){
-			var result = [];
-			var mine = myFeatures[player];
-			var fromOthers = yourFeatures[player]; 
-			for(var i=0; i<mine.length; i++){
-				if(fromOthers.indexOf(mine[i]) > -1){
-					result.push(mine[i]);
+			$.post(
+				"process/johariprocess.php",
+				{players: JSON.stringify(players),
+				myFeatures: JSON.stringify(myFeatures),
+				yourFeatures: JSON.stringify(yourFeatures),
+				features: JSON.stringify(features)},
+				function(data){
+					var d = JSON.parse(data);
+					if(d.key){
+						$("[name='btnFbShare']").click(function(){
+							FB.ui({
+								method: "share",
+								href: "http://beak.sakura.ne.jp/johari/johariresult.php?key="+d.key
+							}, function(res){});
+						});
+						$("[name='btnTwShare']").click(function(){
+							window.open("https://twitter.com/share?text=ジョハリの窓診断を実施しました!!&amp;amp;url=http://beak.sakura.ne.jp/johari/johariresult.php?key="+d.key, "_blank");
+						});
+					}else{
+						alert(d.error);
+					}
 				}
-			}
-			return result;
-		}
-
-		function getHiddenWindow(player){
-			var result = [];
-			var mine = myFeatures[player];
-			var fromOthers = yourFeatures[player]; 
-			for(var i=0; i<mine.length; i++){
-				if(fromOthers.indexOf(mine[i]) == -1){
-					result.push(mine[i]);
-				}
-			}
-			return result;
-		}
-
-		function getBlindWindow(player){
-			var result = [];
-			var mine = myFeatures[player];
-			var fromOthers = yourFeatures[player];
-			for(var i=0; i<fromOthers.length; i++){
-				if(mine.indexOf(fromOthers[i]) == -1){
-					result.push(fromOthers[i]);
-				}
-			}
-			return result;			
-		}
-
-		function getUnknownWindow(player){
-			var result = [];
-			var known = myFeatures[player].concat(yourFeatures[player]);
-			for(var i=0; i<features.length; i++){
-				if(known.indexOf(i.toString()) == -1){
-					result.push(i);
-				}
-			}
-			return result;
-		}
-
-		function convertWinToElements(win){
-			var elm = "<div class='row'>";
-			var numelm = 0;
-			var temp = "";
-			var lastone = "";
-			var times = 0;
-			var convertedFeatures = [];
-			var numExtraBlank = 0;
-
-			for(var i=0; i<features.length; i++){
-				if(lastone === features[win[i]] || i == 0){
-					times++;
-					numExtraBlank++;
-				}else{
-					temp = times>1?lastone+" ×"+times:lastone;
-					convertedFeatures.push(temp);
-					// reset
-					temp = "";
-					times = 1;
-				}
-				lastone = features[win[i]]?features[win[i]]:"&nbsp;";
-			}
-			// process of the last
-			temp = times>1?lastone+"×"+times:lastone;
-			convertedFeatures.push(temp);
-
-			for(var i=0; i<=numExtraBlank; i++){
-				convertedFeatures.push("&nbsp;");
-			}
-
-			for(var i=0; i<convertedFeatures.length; i++){
-				elm += "<div class='col-md-4 col-xs-6'>"+convertedFeatures[i]+"</div>";
-				numelm++;
-				if(numelm == 3){
-					elm += "</div><div class='row'>";
-					numelm = 0;
-				}
-			}
-			elm += "</div>";
-			return elm;
-		}
-
-		function showJohariWindow(player){
-			var result = $("#result");
-			var openWindow;
-			var openWindowElm = "";
-			var hiddenWindow;
-			var hiddenWindowElm = "";
-			var blindWindow;
-			var blindWindowElm = "";
-			var unknownWindow;
-			var unknownWindowElm = "";
-
-			result.append("<h3>" + players[player] +"さんのジョハリの窓</h3>");
-			result.append("<div class='row'><div class='col-md-6 col-xs-6'><div class='alert alert-danger' id='open_" + player + "'><h4>開放の窓</h4></div></div><div class='col-md-6 col-xs-6'><div class='alert alert-success' id='blind_" + player + "'><h4>盲点の窓</h4></div></div></div><div class='row'><div class='col-md-6 col-xs-6'><div class='alert alert-warning' id='hidden_" + player + "'><h4>秘密の窓</h4></div></div><div class='col-md-6 col-xs-6'><div class='alert alert-info' id='unknown_"+ player +"'><h4>未知の窓</h4></div></div></div>");
-			// open window
-			$("#open_" + player).append(convertWinToElements(getOpenWindow(player)));
-
-			// hidden window
-			$("#hidden_" + player).append(convertWinToElements(getHiddenWindow(player)));
-
-			// blind window
-			$("#blind_" + player).append(convertWinToElements(getBlindWindow(player)));
-
-			// unknown window
-			$("#unknown_" + player).append(convertWinToElements(getUnknownWindow(player)));
-			result.append("<hr/>");
-			result.append("<div style='page-break-before:always'>"); //page break for printout
-		}
-
-		function getMaxCheckableNumber(){
-			var numOfFeatures = features.length;
-			var numOfPlayers = players.length;
-			return Math.ceil((numOfFeatures / 1.5)) - (numOfPlayers - 1);
-		}
-
-		function isCheckableNum(player){
-			return $("[name='features_" + player + "']:checked").length <= getMaxCheckableNumber();
+			);
+			var johariWindows = getJohariWindows(players, myFeatures, yourFeatures, features);
+			showJohariWindow(johariWindows, features);
 		}
 
 		$(document).ready(function(){

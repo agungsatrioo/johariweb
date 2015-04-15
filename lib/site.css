@@ -1,0 +1,46 @@
+.navbar{
+	border-radius: 0px;
+}
+.inner-box {
+	width: 1140px;
+	margin: 0px auto;
+}
+.navbar-custom {
+	background-color: #001172;
+	border-color: #001172;
+}
+.btn-fb {
+	background-color: #3a5795;
+}
+.btn-fb:hover {
+	background-color: #4264aa;
+}
+.btn-tw {
+	background-color: #55acee;
+}
+.btn-tw:hover {
+	background-color: #6cb7f0;
+}
+
+@media print{
+	.alert-danger {
+		background-color: #f2838f !important;
+		border: #ed5565;
+		-webkit-print-color-adjust: exact;
+	}
+	.alert-success {
+		background-color: #b9df90 !important;
+		border: #a0d468;
+		-webkit-print-color-adjust: exact;
+	}
+	.alert-warning {
+		background-color: #ffdd87 !important;
+		border: #ffce54;
+		-webkit-print-color-adjust: exact;
+	}
+	.alert-info {
+		background-color: #7cd1ef !important;
+		border: #4fc1e9;
+		-webkit-print-color-adjust: exact;
+	}
+}
