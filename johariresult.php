@@ -109,6 +109,9 @@
 		}
 
 		function showErrorMessage(msg){
+			if(!msg){
+				msg = "エラーが発生しました。"
+			}
 			var result = $("#result");
 			result.append("<h3>"+msg+"</h3>");
 			result.append("<p>結果が表示できません。URLをもう一度お確かめください。</p>");		
