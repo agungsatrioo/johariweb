@@ -3,6 +3,9 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+        <meta property="og:title" content="ジョハリの窓 Web実行ツールで自己分析を行いました！"/>
+		<meta property="og:description" content="あの人の分析結果を今すぐチェック！"/>
+        <meta property="og:image" content="http://potect-a.com/wp-content/uploads/2015/03/johari_app.jpg"/>
         <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
         <link href="/static/bootflat/css/bootflat.min.css" rel="stylesheet" />
         <link href="/static/bootstrap-select/bootstrap-select.min.css" rel="stylesheet" />
@@ -32,6 +35,7 @@
 						<div id="result">
 						<!-- final result is shown here -->
 						</div>
+						<button type="button" id="btnLink" class="btn btn-primary">診断はこちらから！</button>
 					</div>
 				</div>
 			</div>
@@ -73,23 +77,29 @@
  		function initialize(){
 			// reset elements
 			showResult();
+			$("#btnLink").click(
+			function(){
+				location.href='http://potect-a.com/johariwindow.html';
+			});
 		}
 
 		function showResult(){
 			<?php
-				$key = isset($_GET["key"])?$_GET["key"]:"";
-				if($key):
+				$test_key = isset($_GET["test_key"])?$_GET["test_key"]:"";
+				$member_key = isset($_GET["member_key"])?$_GET["member_key"]:"";
+				if($test_key && $member_key):
 			?>
 			$.post(
 				"process/result.php",
-				{key: "<?php echo $key ?>"},
+				{test_key: "<?php echo $test_key ?>", member_key: "<?php echo $member_key ?>"},
 				function(data){
 					var d = JSON.parse(data);
 					if(d.error){
-						showErrorMessage();				
+						showErrorMessage(d.error);
 					}else{
-						var johariWindows = getJohariWindows(d.players, d.myFeatures, d.yourFeatures, d.features);
-						showJohariWindow(johariWindows, d.features);
+						var johariWindows = [];
+						johariWindows.push(getJohariWindows(d.players, d.myFeatures, d.yourFeatures, d.features));
+						showJohariWindow(johariWindows, d.features, false);
 					}
 				}
 			);
@@ -98,9 +108,9 @@
 			<?php endif; ?>
 		}
 
-		function showErrorMessage(){
+		function showErrorMessage(msg){
 			var result = $("#result");
-			result.append("<h3>URLに誤りがあります。</h3>");
+			result.append("<h3>"+msg+"</h3>");
 			result.append("<p>結果が表示できません。URLをもう一度お確かめください。</p>");		
 		}
 

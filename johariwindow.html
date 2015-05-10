@@ -3,6 +3,10 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+        <meta property="og:title" content="ジョハリの窓 Web実行ツール"/>
+        <meta property="og:url" content="http://beak.sakura.ne.jp/johari/johariwindow.html"/>
+		<meta property="og:description" content="自己分析に有効な「ジョハリの窓」がパソコン1台でできるアプリです。就活や社内研修などに活用していただけます。"/>
+		<meta property="og:image" content="http://potect-a.com/wp-content/uploads/2015/03/johari_app.jpg"/>
         <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
         <link href="/static/bootflat/css/bootflat.min.css" rel="stylesheet" />
         <link href="/static/bootstrap-select/bootstrap-select.min.css" rel="stylesheet" />
@@ -78,14 +82,6 @@
 						<div style='page-break-after:always'></div><!-- page break for printout -->
 						<div id="result">
 						<!-- final result is shown here -->
-						</div>
-						<div class="row">
-							<div class="col-md-4">
-								<button type="button" name="btnFbShare" class="btn btn-fb btn-block">結果をFacebookでシェア</button>
-							</div>
-							<div class="col-md-4">
-								<button type="button" name="btnTwShare" class="btn btn-tw btn-block">結果をTwitterでシェア</button>
-							</div>
 						</div>
 						<br/>
 						<button type="button" name="btnRestart" class="btn btn-default">もう一度</button>
@@ -290,10 +286,10 @@
 
 		function updateFeatures(f, p){
 			if(currentPlayer == p){
-				myFeatures[p].push(f);
+				myFeatures[p].push(f * 1);
 			}else{
-				yourFeatures[p].push(f);
-				yourFeatures[p].sort();
+				yourFeatures[p].push(f * 1);
+				yourFeatures[p].sort(f * 1);
 			}
 		}
 
@@ -301,30 +297,38 @@
 			$("[name='conCheck']").css("display", "none");
 			$("[name='conResult']").css("display", "");
 			$.post(
-				"process/johariprocess.php",
-				{players: JSON.stringify(players),
+				"process/johariprocess.php", {
+				players: JSON.stringify(players),
 				myFeatures: JSON.stringify(myFeatures),
 				yourFeatures: JSON.stringify(yourFeatures),
 				features: JSON.stringify(features)},
 				function(data){
 					var d = JSON.parse(data);
-					if(d.key){
-						$("[name='btnFbShare']").click(function(){
-							FB.ui({
-								method: "share",
-								href: "http://beak.sakura.ne.jp/johari/johariresult.php?key="+d.key
-							}, function(res){});
-						});
-						$("[name='btnTwShare']").click(function(){
-							window.open("https://twitter.com/share?text=ジョハリの窓診断を実施しました!!&amp;amp;url=http://beak.sakura.ne.jp/johari/johariresult.php?key="+d.key, "_blank");
-						});
+					if(d.test_key){
+						for(var i=0; i<d.member_keys.length; i++){
+							$("[name='btnFbShare_"+i+"']").attr("member_key", d.member_keys[i]);
+							$("[name='btnTwShare_"+i+"']").attr("member_key", d.member_keys[i]);
+
+							$("[name='btnFbShare_"+i+"']").click(function(){
+								FB.ui({
+									method: "share",
+									href: "http://beak.sakura.ne.jp/johari/johariresult.php?test_key="+d.test_key+"&member_key="+$(this).attr("member_key")
+								}, function(res){});
+							});
+							$("[name='btnTwShare_"+i+"']").click(function(){
+								window.open("https://twitter.com/share?text=ジョハリの窓診断を実施しました!!&amp;url=http://beak.sakura.ne.jp/johari/johariresult.php?test_key="+d.test_key+"%26member_key="+$(this).attr("member_key"), "_blank");
+							});
+						}
 					}else{
 						alert(d.error);
 					}
 				}
 			);
-			var johariWindows = getJohariWindows(players, myFeatures, yourFeatures, features);
-			showJohariWindow(johariWindows, features);
+			var johariWindows = [];
+			for(var i=0; i<players.length; i++){
+				johariWindows.push(getJohariWindows(players[i], myFeatures[i], yourFeatures[i], features));
+			}
+			showJohariWindow(johariWindows, features, true);
 		}
 
 		$(document).ready(function(){

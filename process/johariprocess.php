@@ -1,11 +1,17 @@
 <?php
 	include_once("dbman.php");
+	include_once("util.php");
+
 
 	// store johari window result information
-	$players 	= isset($_POST['players'])?$_POST['players']:"";
-	$my_features = isset($_POST['myFeatures'])?$_POST['myFeatures']:"";
-	$your_features = isset($_POST['yourFeatures'])?$_POST['yourFeatures']:"";
+	$players 	= isset($_POST['players'])?json_decode($_POST['players']):"";
+	$my_features = isset($_POST['myFeatures'])?json_decode($_POST['myFeatures']):"";
+	$your_features = isset($_POST['yourFeatures'])?json_decode($_POST['yourFeatures']):"";
     $features = isset($_POST['features'])?$_POST['features']:"";
+
+    // keys
+    $test_key = "";
+    $member_keys = [];
 
     if($players == "" || $my_features == "" || $your_features  == "" || $features == ""){
     	exit;
@@ -18,8 +24,8 @@
 
 	    // check duplication
 	    while(true){
-			$key = substr(base_convert(md5(uniqid()), 16, 36), 0, 16);
-	    	$sql = $conn->prepare("SELECT * FROM johari_results WHERE keyparam = :key");
+			$test_key = get_key_string(); 
+	    	$sql = $conn->prepare("SELECT * FROM johari_tests WHERE test_key = :key");
 	    	$sql->bindParam(":key", $key);
 	    	$sql->execute();
 	    	if(!$sql->fetch()){
@@ -27,15 +33,34 @@
 	    	}
 	    }
 
-
-	    $sql = $conn->prepare("INSERT INTO johari_results values (null, :key, :players, :my_features, :your_features, :features)");
-	    $sql->bindParam(":key", $key);
-	    $sql->bindParam(":players", $players);
-	    $sql->bindParam(":my_features", $my_features);
-	    $sql->bindParam(":your_features", $your_features);
+	    // add test data
+	    $sql = $conn->prepare("INSERT INTO johari_tests values (null, :test_key, :features)");
+	    $sql->bindParam(":test_key", $test_key);
 	    $sql->bindParam(":features", $features);
 	    $sql->execute();
-	    echo "{\"key\": \"$key\"}";
+
+	    // add players data
+	    for($i=0; $i<count($players); $i++) {
+	    	$member_key = get_key_string();
+	    	$cookie_key = get_key_string();
+	    	array_push($member_keys, '"'.$member_key.'"');
+
+	    	$mf = "[" . implode("," ,$my_features[$i]) . "]";
+	    	$yf = "[" . implode("," ,$your_features[$i]) . "]";
+
+		    $sql = $conn->prepare("INSERT INTO johari_members values (null, :test_key, :member_key, :cookie_key, :name, :my_features, :your_features)");
+		    $sql->bindParam(":test_key", $test_key);
+		    $sql->bindParam(":member_key", $member_key);
+		    $sql->bindParam(":cookie_key", $cookie_key);
+		    $sql->bindParam(":name", $players[$i]);
+		    $sql->bindParam(":my_features", $mf);
+		    $sql->bindParam(":your_features", $yf);
+		    $sql->execute();
+	    }
+
+	    $member_keys_string = implode(",", $member_keys);
+
+	     echo "{\"test_key\": \"$test_key\", \"member_keys\": [$member_keys_string]}";
 	}catch(PDOException $e){
 		$message = $e->getMessage();
     	echo "{\"error\": \"$message\"}";
