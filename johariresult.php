@@ -79,7 +79,7 @@
 			showResult();
 			$("#btnLink").click(
 			function(){
-				location.href='http://potect-a.com/johariwindow.html';
+				location.href='http://potect-a.com/johari-app/';
 			});
 		}
 
