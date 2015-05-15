@@ -2,7 +2,6 @@
 	include_once("dbman.php");
 	include_once("util.php");
 
-
 	// store johari window result information
 	$players 	= isset($_POST['players'])?json_decode($_POST['players']):"";
 	$my_features = isset($_POST['myFeatures'])?json_decode($_POST['myFeatures']):"";
@@ -11,7 +10,7 @@
 
     // keys
     $test_key = "";
-    $member_keys = [];
+    $member_keys = array();
 
     if($players == "" || $my_features == "" || $your_features  == "" || $features == ""){
     	exit;
